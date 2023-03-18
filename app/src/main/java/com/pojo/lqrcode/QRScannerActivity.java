@@ -39,23 +39,12 @@ public class QRScannerActivity extends AppCompatActivity implements ZXingScanner
         //MainActivity.sports.setVisibility(View.VISIBLE);
         //QRDisplayActivity.btnSubmit.setVisibility(View.VISIBLE);
 
+        System.out.println("RegularRest "+scannedResult);
+        String[] words = scannedResult.split("//");
 
-        String[] words = scannedResult.split(":");
+        System.out.println("OkDAta"+words[1]);
+        MainActivity.userIdFromQrScan=words[1];
 
-        for (int i = 0; i < 1; i++) {
-
-            //System.out.println("ArraySize" + words.length);
-
-            //System.out.println("ArrayPosition0"+words[0]);
-
-            //MainActivity.name.setText(words[0]+":"+words[1]+":"+words[2]+":"+words[3]);
-            //MainActivity.name.setText(words[0]);
-            MainActivity.userIdFromQrScan=words[0];
-            //MainActivity.sports.setText(words[2]);
-            //System.out.println("ScanData"+ words[0]);
-            //Toast.makeText(QRScannerActivity.this,"ScanData"+ words[0],Toast.LENGTH_LONG).show();
-
-        }
 
         onBackPressed();
 

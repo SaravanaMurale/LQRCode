@@ -17,6 +17,11 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
+import com.pojo.lqrcode.model.BaseResponse;
+import com.pojo.lqrcode.model.UserDetailsResponse;
+import com.pojo.lqrcode.model.UserEnterRequest;
+import com.pojo.lqrcode.utils.AppConstant;
 import com.pojo.lqrcode.utils.ProgressDlg;
 import com.pojo.lqrcode.webservice.ApiClient;
 import com.pojo.lqrcode.webservice.ApiInterface;
@@ -25,12 +30,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class MainActivity extends AppCompatActivity {
 
     public static  Button btnScanQR,btnReScan,btnSubmit;
     int CAMERA_ACCESS=55;
 
     public static  TextView name,sports,selectSports;
+    CircleImageView circleImageView;
 
     public static String userIdFromQrScan=null;
 
@@ -54,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
 
         name=findViewById(R.id.name);
         //sports=findViewById(R.id.sports);
+        circleImageView=findViewById(R.id.image);
         displayBlock=findViewById(R.id.displayBlock);
         selectSports=findViewById(R.id.selectSports);
 
@@ -87,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
                     selectedDay[i]=false;
                     dayList.clear();
 
-                    selectSports.setText("Selecct Sports");
+                    selectSports.setText("Select Sports");
                 }
 
                 remarks.setText("");
@@ -104,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
                 //String sportsStr=sports.getText().toString();
                 //String remarksStr=remarks.getText().toString();
                 String spinnerSelectedSports=selectSports.getText().toString();
-
+                List<String> sportsList=null;
                 //Toast.makeText(MainActivity.this,"UserEnteredData "+nameStr+" "+sportsStr+" "+remarksStr+" "+spinnerSelectedSports,Toast.LENGTH_LONG).show();
 
                 //System.out.println("UserEnteredData "+nameStr+" "+sportsStr+" "+remarksStr+" "+spinnerSelectedSports);
@@ -115,14 +127,14 @@ public class MainActivity extends AppCompatActivity {
                 }else {
                     String[] sports=spinnerSelectedSports.split(",");
 
-                    List<String> sportsList=new ArrayList<>();
+                   sportsList=new ArrayList<>();
 
                     for (int i = 0; i <sports.length ; i++) {
                         sportsList.add(sports[i]);
                     }
                 }
 
-                //API call
+               doSubmitUserDetails(sportsList);
             }
         });
 
@@ -199,14 +211,59 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void doSubmitUserDetails(List<String> sportsList) {
+
+        Dialog dialog= ProgressDlg.showProgressBar(MainActivity.this);
+        ApiInterface apiService = ApiClient.getAPIClient().create(ApiInterface.class);
+
+        UserEnterRequest userEnterRequest=new UserEnterRequest(userIdFromQrScan,sportsList,remarks.getText().toString());
+
+
+        Call<BaseResponse> call = apiService.doSubmitUserEnteredDetails(userEnterRequest);
+        call.enqueue(new Callback<BaseResponse>() {
+            @Override
+            public void onResponse(Call<BaseResponse> call, Response<BaseResponse> response) {
+
+                BaseResponse baseResponse=   response.body();
+
+                if(baseResponse.getType().equalsIgnoreCase("success")){
+
+
+                    userIdFromQrScan=null;
+                    sportsList.clear();
+                    remarks.setText("");
+                    name.setText("");
+                    for (int i = 0; i <selectedDay.length ; i++) {
+                        selectedDay[i]=false;
+                        dayList.clear();
+
+                        selectSports.setText("Select Sports");
+                    }
+                }
+
+                ProgressDlg.dismisProgressBar(MainActivity.this,dialog);
+
+
+            }
+
+            @Override
+            public void onFailure(Call<BaseResponse> call, Throwable t) {
+
+                ProgressDlg.dismisProgressBar(MainActivity.this,dialog);
+
+            }
+        });
+
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
 
         if(userIdFromQrScan!=null){
-            System.out.println("GetUserDetailsUsingUserId");
+            System.out.println("GetUserDetailsUsingUserId"+userIdFromQrScan);
             
-            //doGetUserDetails(userIdFromQrScan);
+            doGetUserDetails(userIdFromQrScan);
 
         }
 
@@ -217,7 +274,34 @@ public class MainActivity extends AppCompatActivity {
         Dialog dialog= ProgressDlg.showProgressBar(MainActivity.this);
         ApiInterface apiService = ApiClient.getAPIClient().create(ApiInterface.class);
 
-        //Call<BaseRe> call = apiService.doGetUserDetails(userIdFromQrScan);
+        Call<UserDetailsResponse> call = apiService.doGetUserDetails(userIdFromQrScan);
+        call.enqueue(new Callback<UserDetailsResponse>() {
+            @Override
+            public void onResponse(Call<UserDetailsResponse> call, Response<UserDetailsResponse> response) {
+
+                ProgressDlg.dismisProgressBar(MainActivity.this,dialog);
+
+                UserDetailsResponse userDetailsResponse=response.body();
+
+                if(userDetailsResponse.getType().equalsIgnoreCase("success")){
+                    displayBlock.setVisibility(View.VISIBLE);
+                    System.out.println("UserName "+userDetailsResponse.getResponseDataList().get(0).getUserName());
+                    name.setText(userDetailsResponse.getResponseDataList().get(0).getUserName());
+                    Glide.with(MainActivity.this).load(AppConstant.BASE_URL+userDetailsResponse.getResponseDataList().get(0).getUserImage()).into(circleImageView);
+
+
+                }else {
+                    Toast.makeText(MainActivity.this,"Not a valid member",Toast.LENGTH_SHORT).show();
+                }
+
+
+            }
+
+            @Override
+            public void onFailure(Call<UserDetailsResponse> call, Throwable t) {
+                ProgressDlg.dismisProgressBar(MainActivity.this,dialog);
+            }
+        });
 
     }
 
