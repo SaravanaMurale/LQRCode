@@ -1,6 +1,9 @@
 package com.pojo.lqrcode;
 
+import static com.pojo.lqrcode.utils.AppConstant.BASE_URL;
+
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,6 +12,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,9 +29,12 @@ import com.pojo.lqrcode.utils.AppConstant;
 import com.pojo.lqrcode.utils.ProgressDlg;
 import com.pojo.lqrcode.webservice.ApiClient;
 import com.pojo.lqrcode.webservice.ApiInterface;
+import com.squareup.picasso.Picasso;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -40,8 +47,8 @@ public class MainActivity extends AppCompatActivity {
     public static  Button btnScanQR,btnReScan,btnSubmit;
     int CAMERA_ACCESS=55;
 
-    public static  TextView name,sports,selectSports;
-    CircleImageView circleImageView;
+    public static  TextView name,sports,selectSports,address,inTime,outTime;
+    ImageView circleImageView;
 
     public static String userIdFromQrScan=null;
 
@@ -50,8 +57,9 @@ public class MainActivity extends AppCompatActivity {
 
     boolean[] selectedDay;
     ArrayList<Integer> dayList=new ArrayList<>();
-    String[] dayArray={"VolleyBall-100","Chess-200","FootBall-300","Cricket-400"};
+    String[] dayArray={"Cricket","Chess","Carrom","Rummy","Snooker","Vollyball","Library"};
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +76,10 @@ public class MainActivity extends AppCompatActivity {
         circleImageView=findViewById(R.id.image);
         displayBlock=findViewById(R.id.displayBlock);
         selectSports=findViewById(R.id.selectSports);
+        address=findViewById(R.id.addressUser);
+
+        inTime=findViewById(R.id.inTime);
+        outTime=findViewById(R.id.outTime);
 
 
 
@@ -172,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
                             stringBuffer.append(dayArray[dayList.get(i)]);
 
                             if(i!=dayList.size()-1){
-                                stringBuffer.append(", ");
+                                stringBuffer.append(",   ");
                             }
                             
                         }
@@ -216,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
         Dialog dialog= ProgressDlg.showProgressBar(MainActivity.this);
         ApiInterface apiService = ApiClient.getAPIClient().create(ApiInterface.class);
 
-        UserEnterRequest userEnterRequest=new UserEnterRequest(userIdFromQrScan,sportsList,remarks.getText().toString());
+        UserEnterRequest userEnterRequest=new UserEnterRequest(userIdFromQrScan,sportsList,remarks.getText().toString(),inTime.getText().toString(),outTime.getText().toString());
 
 
         Call<BaseResponse> call = apiService.doSubmitUserEnteredDetails(userEnterRequest);
@@ -233,6 +245,12 @@ public class MainActivity extends AppCompatActivity {
                     sportsList.clear();
                     remarks.setText("");
                     name.setText("");
+                    inTime.setText("");
+                    outTime.setText("");
+                    address.setText("");
+
+
+
                     for (int i = 0; i <selectedDay.length ; i++) {
                         selectedDay[i]=false;
                         dayList.clear();
@@ -242,6 +260,8 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 ProgressDlg.dismisProgressBar(MainActivity.this,dialog);
+
+                Toast.makeText(MainActivity.this,"Submitted Successfully",Toast.LENGTH_SHORT).show();
 
 
             }
@@ -284,10 +304,10 @@ public class MainActivity extends AppCompatActivity {
                 UserDetailsResponse userDetailsResponse=response.body();
 
                 if(userDetailsResponse.getType().equalsIgnoreCase("success")){
-                    displayBlock.setVisibility(View.VISIBLE);
-                    System.out.println("UserName "+userDetailsResponse.getResponseDataList().get(0).getUserName());
-                    name.setText(userDetailsResponse.getResponseDataList().get(0).getUserName());
-                    Glide.with(MainActivity.this).load(AppConstant.BASE_URL+userDetailsResponse.getResponseDataList().get(0).getUserImage()).into(circleImageView);
+
+                    displayUserDetails(userDetailsResponse,userIdFromQrScan);
+
+
 
 
                 }else {
@@ -302,6 +322,30 @@ public class MainActivity extends AppCompatActivity {
                 ProgressDlg.dismisProgressBar(MainActivity.this,dialog);
             }
         });
+
+    }
+
+    private void displayUserDetails(UserDetailsResponse userDetailsResponse, String userIdFromQrScan) {
+
+        displayBlock.setVisibility(View.VISIBLE);
+        //System.out.println("UserName "+userDetailsResponse.getResponseDataList().get(0).getUserName());
+        name.setText(userDetailsResponse.getResponseDataList().get(0).getUserName());
+        String imageEndPoint=userDetailsResponse.getResponseDataList().get(0).getUserImage()+userIdFromQrScan+".jpeg";
+        Glide.with(MainActivity.this).load(AppConstant.BASE_URL+imageEndPoint).into(circleImageView);
+
+        //System.out.println("ImagePath "+BASE_URL+imageEndPoint);
+        address.setText(userDetailsResponse.getResponseDataList().get(0).getAddress());
+
+        //Picasso.get().load(BASE_URL+imageEndPoint).into(circleImageView);
+
+
+        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
+        Date date = new Date();
+        //System.out.println("TimeOnly"+formatter.format(date)+" "+userIdFromQrScan);
+
+        inTime.setText(formatter.format(date));
+        outTime.setText("21:00");
+
 
     }
 

@@ -51,6 +51,9 @@ public class UserDetailsResponse {
         @SerializedName("status")
         int status;
 
+        @SerializedName("address")
+        String address;
+
 
         public int getId() {
             return id;
@@ -90,6 +93,14 @@ public class UserDetailsResponse {
 
         public void setStatus(int status) {
             this.status = status;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+
+        public void setAddress(String address) {
+            this.address = address;
         }
     }
 

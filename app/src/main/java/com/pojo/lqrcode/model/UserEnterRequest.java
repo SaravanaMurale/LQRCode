@@ -12,11 +12,19 @@ public class UserEnterRequest {
     List<String> sportsList;
     @SerializedName("remarks")
     String remarks;
+    @SerializedName("in_time")
+    String inTime;
+    @SerializedName("out_time")
+    String outTime;
 
-    public UserEnterRequest(String userId, List<String> sportsList, String remarks) {
+
+
+    public UserEnterRequest(String userId, List<String> sportsList, String remarks,String inTime,String outTime) {
         this.userId = userId;
         this.sportsList = sportsList;
         this.remarks = remarks;
+        this.inTime=inTime;
+        this.outTime=outTime;
     }
 
     public String getUserId() {
@@ -41,5 +49,21 @@ public class UserEnterRequest {
 
     public void setRemarks(String remarks) {
         this.remarks = remarks;
+    }
+
+    public String getInTime() {
+        return inTime;
+    }
+
+    public void setInTime(String inTime) {
+        this.inTime = inTime;
+    }
+
+    public String getOutTime() {
+        return outTime;
+    }
+
+    public void setOutTime(String outTime) {
+        this.outTime = outTime;
     }
 }

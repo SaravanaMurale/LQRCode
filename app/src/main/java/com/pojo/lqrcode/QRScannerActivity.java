@@ -42,8 +42,8 @@ public class QRScannerActivity extends AppCompatActivity implements ZXingScanner
         System.out.println("RegularRest "+scannedResult);
         String[] words = scannedResult.split("//");
 
-        System.out.println("OkDAta"+words[1]);
-        MainActivity.userIdFromQrScan=words[1];
+        System.out.println("OkDAta"+words[0]);
+        MainActivity.userIdFromQrScan=words[0];
 
 
         onBackPressed();
