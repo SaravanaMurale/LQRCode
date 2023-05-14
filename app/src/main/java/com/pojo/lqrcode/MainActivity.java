@@ -26,6 +26,7 @@ import com.pojo.lqrcode.model.BaseResponse;
 import com.pojo.lqrcode.model.UserDetailsResponse;
 import com.pojo.lqrcode.model.UserEnterRequest;
 import com.pojo.lqrcode.utils.AppConstant;
+import com.pojo.lqrcode.utils.AsyncTaskImageDownload;
 import com.pojo.lqrcode.utils.ProgressDlg;
 import com.pojo.lqrcode.webservice.ApiClient;
 import com.pojo.lqrcode.webservice.ApiInterface;
@@ -305,6 +306,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if(userDetailsResponse.getType().equalsIgnoreCase("success")){
 
+
                     displayUserDetails(userDetailsResponse,userIdFromQrScan);
 
 
@@ -331,12 +333,15 @@ public class MainActivity extends AppCompatActivity {
         //System.out.println("UserName "+userDetailsResponse.getResponseDataList().get(0).getUserName());
         name.setText(userDetailsResponse.getResponseDataList().get(0).getUserName());
         String imageEndPoint=userDetailsResponse.getResponseDataList().get(0).getUserImage()+userIdFromQrScan+".jpeg";
-        Glide.with(MainActivity.this).load(AppConstant.BASE_URL+imageEndPoint).into(circleImageView);
+        //Glide.with(MainActivity.this).load(AppConstant.BASE_URL+imageEndPoint).into(circleImageView);
 
         //System.out.println("ImagePath "+BASE_URL+imageEndPoint);
         address.setText(userDetailsResponse.getResponseDataList().get(0).getAddress());
 
         //Picasso.get().load(BASE_URL+imageEndPoint).into(circleImageView);
+
+
+
 
 
         SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
@@ -345,6 +350,9 @@ public class MainActivity extends AppCompatActivity {
 
         inTime.setText(formatter.format(date));
         outTime.setText("21:00");
+
+        AsyncTaskImageDownload asyncTask=new AsyncTaskImageDownload(circleImageView);
+        asyncTask.execute(BASE_URL+imageEndPoint);
 
 
     }
