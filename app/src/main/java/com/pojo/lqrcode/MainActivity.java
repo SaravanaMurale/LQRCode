@@ -125,16 +125,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                //String nameStr=name.getText().toString();
-                //String sportsStr=sports.getText().toString();
-                //String remarksStr=remarks.getText().toString();
                 String spinnerSelectedSports=selectSports.getText().toString();
                 List<String> sportsList=null;
-                //Toast.makeText(MainActivity.this,"UserEnteredData "+nameStr+" "+sportsStr+" "+remarksStr+" "+spinnerSelectedSports,Toast.LENGTH_LONG).show();
 
-                //System.out.println("UserEnteredData "+nameStr+" "+sportsStr+" "+remarksStr+" "+spinnerSelectedSports);
-
-                System.out.println("UserEnteredData "+spinnerSelectedSports);
+               // System.out.println("UserEnteredData "+spinnerSelectedSports);
                 if(spinnerSelectedSports.equalsIgnoreCase("Select Sports")){
                     Toast.makeText(MainActivity.this,"Please Select Sports",Toast.LENGTH_SHORT).show();
                 }else {
@@ -251,7 +245,6 @@ public class MainActivity extends AppCompatActivity {
                     address.setText("");
 
 
-
                     for (int i = 0; i <selectedDay.length ; i++) {
                         selectedDay[i]=false;
                         dayList.clear();
@@ -329,30 +322,22 @@ public class MainActivity extends AppCompatActivity {
 
     private void displayUserDetails(UserDetailsResponse userDetailsResponse, String userIdFromQrScan) {
 
-        displayBlock.setVisibility(View.VISIBLE);
-        //System.out.println("UserName "+userDetailsResponse.getResponseDataList().get(0).getUserName());
-        name.setText(userDetailsResponse.getResponseDataList().get(0).getUserName());
         String imageEndPoint=userDetailsResponse.getResponseDataList().get(0).getUserImage()+userIdFromQrScan+".jpeg";
-        //Glide.with(MainActivity.this).load(AppConstant.BASE_URL+imageEndPoint).into(circleImageView);
+        AsyncTaskImageDownload asyncTask=new AsyncTaskImageDownload(circleImageView);
+        asyncTask.execute(BASE_URL+imageEndPoint);
 
-        //System.out.println("ImagePath "+BASE_URL+imageEndPoint);
+        displayBlock.setVisibility(View.VISIBLE);
+        name.setText(userDetailsResponse.getResponseDataList().get(0).getUserName());
         address.setText(userDetailsResponse.getResponseDataList().get(0).getAddress());
-
-        //Picasso.get().load(BASE_URL+imageEndPoint).into(circleImageView);
-
-
-
 
 
         SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
         Date date = new Date();
-        //System.out.println("TimeOnly"+formatter.format(date)+" "+userIdFromQrScan);
 
         inTime.setText(formatter.format(date));
         outTime.setText("21:00");
 
-        AsyncTaskImageDownload asyncTask=new AsyncTaskImageDownload(circleImageView);
-        asyncTask.execute(BASE_URL+imageEndPoint);
+
 
 
     }
