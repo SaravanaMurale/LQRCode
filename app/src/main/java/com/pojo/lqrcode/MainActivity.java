@@ -73,7 +73,6 @@ public class MainActivity extends AppCompatActivity {
         remarks=findViewById(R.id.remarks);
 
         name=findViewById(R.id.name);
-        //sports=findViewById(R.id.sports);
         circleImageView=findViewById(R.id.image);
         displayBlock=findViewById(R.id.displayBlock);
         selectSports=findViewById(R.id.selectSports);
